@@ -1,4 +1,4 @@
-//  create server in express  on port 3000
+require('dotenv').config;
 const express = require('express');
 const bodyParser = require('body-parser');
 
@@ -6,7 +6,9 @@ const app = express();
 const cors = require('cors');
 const db = require('./db');
 
-const productRoutes = require('./routes/products/products.route.js');
+const router = require('./routes/index.js');
+
+const { Client } = require('./models');
 app.use(
 	cors({
 		origin: 'http://localhost:3000',
@@ -14,11 +16,18 @@ app.use(
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 // app.get('/users', db.getUsers);
-// app.get('/', db.getUsers);
+app.use('/api', router);
 
-// app.use('/api', productRoutes);
+const start = async () => {
+	try {
+		await db.authenticate();
+		await db.sync();
+		app.listen(8000, () => console.log(`Server started on port ${8000}`));
+	} catch (e) {
+		console.log(e);
+	}
+};
 
-app.listen(8000, () => {
-	console.log('Server is running on port 8000');
-});
+start();
